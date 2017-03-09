@@ -74,6 +74,27 @@ if __name__ == "__main__":
     except IndexError:
         print("Error: Please supply the input and output file paths")
         print("e.g. python feature_extraction.py <input_path> <output_path>")
-        exit()
+        exit(1)
+    try:
+        input_file = open(input_path)
+        output_file = open(output_path, 'w')
+    except IOError as e:
+        print(str(e))
+        exit(1)
+
     sents = load_words(input_path)
+    feature_funcs = [gen_feature_func(get_word_at, 0), gen_feature_func(get_word_at, -1), 
+                gen_feature_func(get_word_at, -2), gen_feature_func(get_word_at, 1)]
+    for s in sents:
+        features = extract_features(s, feature_funcs)
+        for i in range(len(s)):
+            label = get_label_at(i, s, 0)
+            line = label
+            for f in features[i]:
+                if not f is None:
+                    line += '\t'+f
+            output_file.write(line+'\n')
+
+    input_file.close()
+    output_file.close()
 
